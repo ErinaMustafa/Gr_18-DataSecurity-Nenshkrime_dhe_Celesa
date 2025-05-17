@@ -42,3 +42,21 @@ def print_cert_info(cert_path, title):
                 public_key = server_cert.public_key()
 
             return private_key, public_key
+
+        def sign_message(private_key, message):
+            """Krijo nënshkrimin dhe shfaq detaje"""
+            signature = private_key.sign(
+                message,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+
+            digest = hashes.Hash(hashes.SHA256())
+            digest.update(message)
+            hash_bytes = digest.finalize()
+            print(f"Mesazhi (hash): {binascii.hexlify(hash_bytes)}")
+            print(f"\n🔏 Nënshkrimi i krijuar: {binascii.hexlify(signature)}")
+            return signature
