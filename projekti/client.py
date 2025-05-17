@@ -23,3 +23,22 @@ def print_cert_info(cert_path, title):
         print(f"Valid Until: {cert.not_valid_after_utc}")
         print(f"Serial Number: {cert.serial_number}")
         print(f"Public Key: {cert.public_key().public_numbers()}")
+
+        def load_certificates():
+            """Ngarko certifikatat dhe shfaq informacione"""
+            print("\n Klienti po ngarkon certifikatat...")
+            print_cert_info(CLIENT_CERT, "Client Certificate")
+            print_cert_info(SERVER_CERT, "Server Certificate")
+
+            with open(CLIENT_KEY, "rb") as f:
+                private_key = serialization.load_pem_private_key(
+                    f.read(),
+                    password=None,
+                    backend=default_backend()
+                )
+
+            with open(SERVER_CERT, "rb") as f:
+                server_cert = x509.load_pem_x509_certificate(f.read(), default_backend())
+                public_key = server_cert.public_key()
+
+            return private_key, public_key
