@@ -12,3 +12,14 @@ CERT_FOLDER = Path("/home/erisasollova/PycharmProjects/UshtrimeDataSecurity/proj
 CLIENT_CERT = CERT_FOLDER / "client.crt"
 CLIENT_KEY = CERT_FOLDER / "client.key"
 SERVER_CERT = CERT_FOLDER / "server.crt"
+def print_cert_info(cert_path, title):
+    """Shfaq informacione rreth certifikatës"""
+    print(f"\n {title} Information:")
+    with open(cert_path, "rb") as f:
+        cert = x509.load_pem_x509_certificate(f.read(), default_backend())
+        print(f"Subject: {cert.subject.rfc4514_string()}")
+        print(f"Issuer: {cert.issuer.rfc4514_string()}")
+        print(f"Valid From: {cert.not_valid_before_utc}")
+        print(f"Valid Until: {cert.not_valid_after_utc}")
+        print(f"Serial Number: {cert.serial_number}")
+        print(f"Public Key: {cert.public_key().public_numbers()}")
