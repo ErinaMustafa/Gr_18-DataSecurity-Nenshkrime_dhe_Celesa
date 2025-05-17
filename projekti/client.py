@@ -8,3 +8,7 @@ from pathlib import Path
 import binascii
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+CERT_FOLDER = Path("/home/erisasollova/PycharmProjects/UshtrimeDataSecurity/projekti/certifikata")
+CLIENT_CERT = CERT_FOLDER / "client.crt"
+CLIENT_KEY = CERT_FOLDER / "client.key"
+SERVER_CERT = CERT_FOLDER / "server.crt"
