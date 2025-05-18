@@ -16,8 +16,9 @@ SERVER_CERT = CERT_FOLDER / "server.crt"
 SERVER_KEY = CERT_FOLDER / "server.key"
 CLIENT_CERT = CERT_FOLDER / "client.crt"
 
+
 def print_cert_info(cert_path, title):
-    """Shfaq informacione rreth certifikates"""
+
     print(f"\n {title} Information:")
     with open(cert_path, "rb") as f:
         cert = x509.load_pem_x509_certificate(f.read(), default_backend())
@@ -32,8 +33,9 @@ def print_cert_info(cert_path, title):
         print(f"Serial Number: {cert.serial_number}")
         print(f"Public Key: {cert.public_key().public_numbers()}")
 
+
 def load_certificates():
-    """Ngarko certifikatat dhe shfaq informacione"""
+
     print("\n Serveri po ngarkon certifikatat...")
     print_cert_info(SERVER_CERT, "Server Certificate")
     print_cert_info(CLIENT_CERT, "Client Certificate")
@@ -46,8 +48,9 @@ def load_certificates():
         )
     return private_key
 
+
 def verify_signature(message, signature):
-    """Verifiko nenshkrimin dhe shfaq detaje"""
+
     with open(CLIENT_CERT, "rb") as f:
         client_cert = f.read()
 
@@ -59,7 +62,7 @@ def verify_signature(message, signature):
     digest.update(message)
     message_hash = digest.finalize()
     print(f"Mesazhi (hash): {binascii.hexlify(message_hash)}")
-    print(f"Nenshkrimi i marrur: {binascii.hexlify(signature)}")
+    print(f" Nenshkrimi i marre: {binascii.hexlify(signature)}")
 
     try:
         public_key.verify(
@@ -76,3 +79,37 @@ def verify_signature(message, signature):
     except Exception as e:
         print(f" Verifikimi deshtoi: {e}")
         return False
+
+
+def hybrid_decrypt(private_key, encrypted_payload):
+
+    try:
+
+        parts = encrypted_payload.split(b'||')
+        if len(parts) != 3:
+            raise ValueError("Formati i payload-it eshte i pavlefshem")
+
+        encrypted_key = parts[0]
+        iv = parts[1]
+        ciphertext = parts[2]
+
+
+        aes_key = private_key.decrypt(
+            encrypted_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+
+        cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv))
+        decryptor = cipher.decryptor()
+        decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+
+        return decrypted_data
+    except Exception as e:
+        print(f" Gabim gjate dekriptimit hibrid: {e}")
+        raise
+
