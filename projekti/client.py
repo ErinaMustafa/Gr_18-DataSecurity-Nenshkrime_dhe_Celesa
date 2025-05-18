@@ -130,3 +130,8 @@ def start_client():
             print(f"\n📨 Pergjigja nga serveri: {response.decode('utf-8')}")
 
 
+if __name__ == "__main__":
+    print("=" * 60)
+    print("🖥️  KLIENTI I SIGURTE TCP ME KRIPTIM DHE NENSHKRIMME DIGJITALE")
+    print("=" * 60)
+    start_client()
