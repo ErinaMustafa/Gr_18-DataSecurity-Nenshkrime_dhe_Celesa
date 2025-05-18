@@ -17,7 +17,7 @@ SERVER_KEY = CERT_FOLDER / "server.key"
 CLIENT_CERT = CERT_FOLDER / "client.crt"
 
 def print_cert_info(cert_path, title):
-    """Shfaq informacione rreth certifikatës"""
+    """Shfaq informacione rreth certifikates"""
     print(f"\n {title} Information:")
     with open(cert_path, "rb") as f:
         cert = x509.load_pem_x509_certificate(f.read(), default_backend())
@@ -47,19 +47,19 @@ def load_certificates():
     return private_key
 
 def verify_signature(message, signature):
-    """Verifiko nënshkrimin dhe shfaq detaje"""
+    """Verifiko nenshkrimin dhe shfaq detaje"""
     with open(CLIENT_CERT, "rb") as f:
         client_cert = f.read()
 
     cert = x509.load_pem_x509_certificate(client_cert, default_backend())
     public_key = cert.public_key()
 
-    print("\n Procesi i Verifikimit të Nënshkrimit:")
+    print("\n Procesi i Verifikimit të Nenshkrimit:")
     digest = hashes.Hash(hashes.SHA256())
     digest.update(message)
     message_hash = digest.finalize()
     print(f"Mesazhi (hash): {binascii.hexlify(message_hash)}")
-    print(f"Nënshkrimi i marrë: {binascii.hexlify(signature)}")
+    print(f"Nenshkrimi i marrur: {binascii.hexlify(signature)}")
 
     try:
         public_key.verify(
@@ -71,8 +71,8 @@ def verify_signature(message, signature):
             ),
             hashes.SHA256()
         )
-        print(" Nënshkrimi u verifikua me sukses!")
+        print(" Nenshkrimi u verifikua me sukses!")
         return True
     except Exception as e:
-        print(f" Verifikimi dështoi: {e}")
+        print(f" Verifikimi deshtoi: {e}")
         return False

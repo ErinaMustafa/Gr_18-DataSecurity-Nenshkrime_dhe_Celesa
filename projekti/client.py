@@ -58,7 +58,7 @@ def print_cert_info(cert_path, title):
             digest.update(message)
             hash_bytes = digest.finalize()
             print(f"Mesazhi (hash): {binascii.hexlify(hash_bytes)}")
-            print(f"\n🔏 Nenshkrimi i krijuar: {binascii.hexlify(signature)}")
+            print(f"\n Nenshkrimi i krijuar: {binascii.hexlify(signature)}")
             return signature
 
 
@@ -86,12 +86,12 @@ def hybrid_encrypt(public_key, message):
             )
         )
 
-        # 5. Krijo payload: encrypted_key || iv || ciphertext
+        # 5. Krijo payload: encrypted_key , iv , ciphertext
         final_payload = encrypted_key + b'||' + iv + b'||' + ciphertext
         return final_payload
 
     except Exception as e:
-        print(f"❌ Gabim gjate enkriptimit hibrid: {e}")
+        print(f" Gabim gjate enkriptimit hibrid: {e}")
         raise
 
 def start_client():
@@ -100,9 +100,9 @@ def start_client():
 
     private_key, server_public_key = load_certificates()
     try:
-        message = input("\n✏️ Shkruani mesazhin per te derguar: ").encode('utf-8')
+        message = input("\n Shkruani mesazhin per te derguar: ").encode('utf-8')
     except KeyboardInterrupt:
-        print("\n🔴 Nderprerje nga perdoruesi. Programi po mbyllet.")
+        print("\n Nderprerje nga perdoruesi. Programi po mbyllet.")
         return
 
     # Krijo nenshkrimin
@@ -110,7 +110,7 @@ def start_client():
 
     # Kombino mesazhin dhe nenshkrimin
     combined = message + b'||SIG||' + signature
-    print(f"\n🧩 Mesazhi i kombinuar: {binascii.hexlify(combined)}")
+    print(f"\n Mesazhi i kombinuar: {binascii.hexlify(combined)}")
 
     # Kripto te gjithe permbajtjen
     encrypted_data = hybrid_encrypt(server_public_key, combined)
@@ -123,15 +123,15 @@ def start_client():
 
     with socket.create_connection((host, port)) as sock:
         with context.wrap_socket(sock, server_hostname=host) as ssock:
-            print(f"\n🚀 Dergimi i {len(encrypted_data)} bytes te te dhenave te kriptuara...")
+            print(f"\n Dergimi i {len(encrypted_data)} bytes te te dhenave te kriptuara...")
             ssock.sendall(encrypted_data)
 
             response = ssock.recv(4096)
-            print(f"\n📨 Pergjigja nga serveri: {response.decode('utf-8')}")
+            print(f"\n Pergjigja nga serveri: {response.decode('utf-8')}")
 
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("🖥️  KLIENTI I SIGURTE TCP ME KRIPTIM DHE NENSHKRIMME DIGJITALE")
+    print("  KLIENTI I SIGURTE-TCP ME KRIPTIM DHE NENSHKRIME DIGJITALE")
     print("=" * 60)
     start_client()
