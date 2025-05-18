@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def transfer_certifikatat():
-    # Rruget e burimit
+
     certifikatat = {
         "client.crt": "/home/erisasollova/client.crt",
         "client.key": "/home/erisasollova/client.key",
@@ -12,10 +12,10 @@ def transfer_certifikatat():
         "server.key": "/home/erisasollova/server.key"
     }
 
-    # Destinacioni ne projekt
-    dest_folder = "/home/erisasollova/PycharmProjects/DataSecurity/projekti/certifikata"
 
-    # Krijo folderin nese nuk ekziston
+    dest_folder = "/home/erisasollova/PycharmProjects/Gr_18-DataSecurity-Nenshkrime_dhe_Celesa/projekti/certifikata"
+
+
     Path(dest_folder).mkdir(parents=True, exist_ok=True)
 
     print(" Transferimi i certifikatave...")

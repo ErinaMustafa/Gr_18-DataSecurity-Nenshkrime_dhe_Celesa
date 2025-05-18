@@ -8,12 +8,15 @@ from pathlib import Path
 import binascii
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+
 CERT_FOLDER = Path("/home/erisasollova/PycharmProjects/UshtrimeDataSecurity/projekti/certifikata")
 CLIENT_CERT = CERT_FOLDER / "client.crt"
 CLIENT_KEY = CERT_FOLDER / "client.key"
 SERVER_CERT = CERT_FOLDER / "server.crt"
+
 def print_cert_info(cert_path, title):
-    """Shfaq informacione rreth certifikates"""
+
     print(f"\n {title} Information:")
     with open(cert_path, "rb") as f:
         cert = x509.load_pem_x509_certificate(f.read(), default_backend())
@@ -24,59 +27,58 @@ def print_cert_info(cert_path, title):
         print(f"Serial Number: {cert.serial_number}")
         print(f"Public Key: {cert.public_key().public_numbers()}")
 
-        def load_certificates():
-            """Ngarko certifikatat dhe shfaq informacione"""
-            print("\n Klienti po ngarkon certifikatat...")
-            print_cert_info(CLIENT_CERT, "Client Certificate")
-            print_cert_info(SERVER_CERT, "Server Certificate")
+def load_certificates():
 
-            with open(CLIENT_KEY, "rb") as f:
-                private_key = serialization.load_pem_private_key(
-                    f.read(),
-                    password=None,
-                    backend=default_backend()
-                )
+    print("\n Klienti po ngarkon certifikatat...")
+    print_cert_info(CLIENT_CERT, "Client Certificate")
+    print_cert_info(SERVER_CERT, "Server Certificate")
 
-            with open(SERVER_CERT, "rb") as f:
-                server_cert = x509.load_pem_x509_certificate(f.read(), default_backend())
-                public_key = server_cert.public_key()
+    with open(CLIENT_KEY, "rb") as f:
+        private_key = serialization.load_pem_private_key(
+            f.read(),
+            password=None,
+            backend=default_backend()
+        )
 
-            return private_key, public_key
+    with open(SERVER_CERT, "rb") as f:
+        server_cert = x509.load_pem_x509_certificate(f.read(), default_backend())
+        public_key = server_cert.public_key()
 
-        def sign_message(private_key, message):
-            """Krijo nenshkrimin dhe shfaq detaje"""
-            signature = private_key.sign(
-                message,
-                padding.PSS(
-                    mgf=padding.MGF1(hashes.SHA256()),
-                    salt_length=padding.PSS.MAX_LENGTH
-                ),
-                hashes.SHA256()
-            )
+    return private_key, public_key
 
-            digest = hashes.Hash(hashes.SHA256())
-            digest.update(message)
-            hash_bytes = digest.finalize()
-            print(f"Mesazhi (hash): {binascii.hexlify(hash_bytes)}")
-            print(f"\n Nenshkrimi i krijuar: {binascii.hexlify(signature)}")
-            return signature
+def sign_message(private_key, message):
 
+    signature = private_key.sign(
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+
+    digest = hashes.Hash(hashes.SHA256())
+    digest.update(message)
+    hash_bytes = digest.finalize()
+    print(f"Mesazhi (hash): {binascii.hexlify(hash_bytes)}")
+    print(f"\n Nenshkrimi i krijuar: {binascii.hexlify(signature)}")
+    return signature
 
 def hybrid_encrypt(public_key, message):
-    """Enkripto mesazhin duke perdorur hybrid encryption (AES + RSA)"""
+
     try:
-        # 1. Gjenero celesin simetrik AES (256-bit)
+
         aes_key = os.urandom(32)
 
-        # 2. Gjenero IV per AES CFB
+
         iv = os.urandom(16)
 
-        # 3. Enkripto mesazhin me AES
+
         cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv))
         encryptor = cipher.encryptor()
         ciphertext = encryptor.update(message) + encryptor.finalize()
 
-        # 4. Enkripto celesin AES me RSA
+
         encrypted_key = public_key.encrypt(
             aes_key,
             padding.OAEP(
@@ -86,7 +88,7 @@ def hybrid_encrypt(public_key, message):
             )
         )
 
-        # 5. Krijo payload: encrypted_key , iv , ciphertext
+
         final_payload = encrypted_key + b'||' + iv + b'||' + ciphertext
         return final_payload
 
@@ -100,22 +102,22 @@ def start_client():
 
     private_key, server_public_key = load_certificates()
     try:
-        message = input("\n Shkruani mesazhin per te derguar: ").encode('utf-8')
+        message = input("\n✏ Shkruani mesazhin per te derguar: ").encode('utf-8')
     except KeyboardInterrupt:
         print("\n Nderprerje nga perdoruesi. Programi po mbyllet.")
         return
 
-    # Krijo nenshkrimin
+
     signature = sign_message(private_key, message)
 
-    # Kombino mesazhin dhe nenshkrimin
+
     combined = message + b'||SIG||' + signature
     print(f"\n Mesazhi i kombinuar: {binascii.hexlify(combined)}")
 
-    # Kripto te gjithe permbajtjen
+
     encrypted_data = hybrid_encrypt(server_public_key, combined)
 
-    # Krijo lidhjen e sigurt
+
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     context.load_cert_chain(certfile=CLIENT_CERT, keyfile=CLIENT_KEY)
     context.load_verify_locations(cafile=SERVER_CERT)
@@ -129,9 +131,8 @@ def start_client():
             response = ssock.recv(4096)
             print(f"\n Pergjigja nga serveri: {response.decode('utf-8')}")
 
-
 if __name__ == "__main__":
     print("=" * 60)
-    print("  KLIENTI I SIGURTE-TCP ME KRIPTIM DHE NENSHKRIME DIGJITALE")
+    print("  KLIENTI I SIGURTE TCP ME KRIPTIM DHE NENSHKRIMME DIGJITALE")
     print("=" * 60)
     start_client()
