@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.13 (Gr_18-DataSecurity-Nenshkrime_dhe_Celesa)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (DataSecurity-Gr_18)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
