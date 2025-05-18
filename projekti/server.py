@@ -162,3 +162,8 @@ def start_server():
                     print(f"\n{error_msg}")
                     conn.sendall(error_msg.encode('utf-8'))
 
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("=" * 60)
+    start_server()
