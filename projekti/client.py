@@ -13,7 +13,7 @@ CLIENT_CERT = CERT_FOLDER / "client.crt"
 CLIENT_KEY = CERT_FOLDER / "client.key"
 SERVER_CERT = CERT_FOLDER / "server.crt"
 def print_cert_info(cert_path, title):
-    """Shfaq informacione rreth certifikatës"""
+    """Shfaq informacione rreth certifikates"""
     print(f"\n {title} Information:")
     with open(cert_path, "rb") as f:
         cert = x509.load_pem_x509_certificate(f.read(), default_backend())
@@ -44,7 +44,7 @@ def print_cert_info(cert_path, title):
             return private_key, public_key
 
         def sign_message(private_key, message):
-            """Krijo nënshkrimin dhe shfaq detaje"""
+            """Krijo nenshkrimin dhe shfaq detaje"""
             signature = private_key.sign(
                 message,
                 padding.PSS(
@@ -58,5 +58,36 @@ def print_cert_info(cert_path, title):
             digest.update(message)
             hash_bytes = digest.finalize()
             print(f"Mesazhi (hash): {binascii.hexlify(hash_bytes)}")
-            print(f"\n🔏 Nënshkrimi i krijuar: {binascii.hexlify(signature)}")
+            print(f"\n🔏 Nenshkrimi i krijuar: {binascii.hexlify(signature)}")
             return signature
+def hybrid_encrypt(public_key, message):
+    """Enkripto mesazhin duke perdorur hybrid encryption (AES + RSA)"""
+    try:
+        # 1. Gjenero celesin simetrik AES (256-bit)
+        aes_key = os.urandom(32)
+
+        # 2. Gjenero IV per AES CFB
+        iv = os.urandom(16)
+
+        # 3. Enkripto mesazhin me AES
+        cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv))
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(message) + encryptor.finalize()
+
+        # 4. Enkripto celesin AES me RSA
+        encrypted_key = public_key.encrypt(
+            aes_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        # 5. Krijo payload: encrypted_key || iv || ciphertext
+        final_payload = encrypted_key + b'||' + iv + b'||' + ciphertext
+        return final_payload
+
+    except Exception as e:
+        print(f"❌ Gabim gjate enkriptimit hibrid: {e}")
+        raise
