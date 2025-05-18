@@ -60,3 +60,19 @@ def verify_signature(message, signature):
     message_hash = digest.finalize()
     print(f"Mesazhi (hash): {binascii.hexlify(message_hash)}")
     print(f"Nënshkrimi i marrë: {binascii.hexlify(signature)}")
+
+    try:
+        public_key.verify(
+            signature,
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        print(" Nënshkrimi u verifikua me sukses!")
+        return True
+    except Exception as e:
+        print(f" Verifikimi dështoi: {e}")
+        return False
