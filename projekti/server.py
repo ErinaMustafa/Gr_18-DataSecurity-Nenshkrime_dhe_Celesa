@@ -113,3 +113,52 @@ def hybrid_decrypt(private_key, encrypted_payload):
         print(f" Gabim gjate dekriptimit hibrid: {e}")
         raise
 
+
+def start_server():
+    host = 'localhost'
+    port = 5000
+
+    private_key = load_certificates()
+
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(certfile=SERVER_CERT, keyfile=SERVER_KEY)
+    context.load_verify_locations(cafile=CLIENT_CERT)
+    context.verify_mode = ssl.CERT_REQUIRED
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind((host, port))
+        sock.listen(1)
+        print(f"\n Serveri po pret lidhje ne {host}:{port}...")
+
+        with context.wrap_socket(sock, server_side=True) as ssock:
+            conn, addr = ssock.accept()
+            with conn:
+                print(f"\n Lidhja u krijua me: {addr}")
+
+                encrypted_data = conn.recv(4096)
+                print(f"\n Mesazhi i kriptuar i marre ({len(encrypted_data)} bytes)")
+
+                try:
+
+                    decrypted_data = hybrid_decrypt(private_key, encrypted_data)
+                    print(f"\n Mesazhi i dekriptuar: {binascii.hexlify(decrypted_data)}")
+
+                    # Ndaj mesazhin dhe nënshkrimin
+                    message, signature = decrypted_data.split(b'||SIG||')
+                    print(f"\n Mesazhi i paster: {message.decode('utf-8')}")
+
+                    # Verifiko nënshkrimin
+                    if verify_signature(message, signature):
+                        response = " Serveri pranoi mesazhin dhe verifikoi nenshkrimin!"
+                        print(f"\n{response}")
+                        conn.sendall(response.encode('utf-8'))
+                    else:
+                        response = " Serveri nuk verifikoi nenshkrimin!"
+                        print(f"\n{response}")
+                        conn.sendall(response.encode('utf-8'))
+
+                except Exception as e:
+                    error_msg = f" Gabim në perpunim: {str(e)}"
+                    print(f"\n{error_msg}")
+                    conn.sendall(error_msg.encode('utf-8'))
+
