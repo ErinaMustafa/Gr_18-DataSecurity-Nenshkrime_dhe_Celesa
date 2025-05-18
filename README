@@ -1,0 +1,42 @@
+Gr_18-DataSecurity-Nenshkrime_dhe_Celesa
+
+Ky projekt realizon një komunikim të sigurt midis një klienti dhe një serveri, duke përdorur certifikata dixhitale, nënshkrim dixhital dhe enkriptim hibrid për të siguruar konfidencialitetin, autenticitetin dhe integritetin e mesazheve të shkëmbyera.
+
+Teknologjitë e përdorura
+•	Python 3
+•	SSL/TLS për lidhje të sigurt
+•	RSA (kriptim asimetrik) për shpërndarjen e çelësave
+•	AES (kriptim simetrik) për enkriptimin e mesazheve
+•	SHA-256 për krijimin e hash-eve
+•	Nënshkrim dixhital për verifikimin e identitetit të klientit
+•   Linux/Ubuntu
+
+Dosjet kryesore
+•	klienti.py: kodi i klientit që dërgon mesazhin e nënshkruar dhe të enkriptuar.
+•	serveri.py: kodi i serverit që pranon mesazhin, e dekripton dhe verifikon nënshkrimin.
+•	transfero_certifikatat.py: script për të kopjuar certifikatat në vendin e duhur.
+•	Dosja certifikata/: përmban:
+	server.crt, server.key
+	client.crt, client.key
+
+Funksionaliteti
+
+Klienti:
+1.	Krijon një mesazh.
+2.	Gjeneron hash me SHA-256.
+3.	Nënshkruan hash-in me çelësin privat të klientit.
+4.	Bashkon mesazhin me nënshkrimin.
+5.	Gjeneron një çelës AES për kriptim simetrik.
+6.	Enkripton mesazhin me AES.
+7.	Enkripton çelësin AES me çelësin publik të serverit (RSA).
+8.	Dërgon mesazhin e enkriptuar dhe çelësin AES te serveri përmes një lidhjeje të sigurt TLS.
+
+Serveri:
+1.	Pranon lidhjen nga klienti përmes TLS.
+2.	Pranon mesazhin dhe çelësin e enkriptuar.
+3.	Dekriptojnë çelësin AES me çelësin privat të serverit.
+4.	Dekriptojnë mesazhin me AES.
+5.	Nxjerrin nënshkrimin dhe mesazhin origjinal.
+6.	Gjenerojnë hash të mesazhit.
+7.	Verifikojnë nënshkrimin me çelësin publik të klientit.
+
