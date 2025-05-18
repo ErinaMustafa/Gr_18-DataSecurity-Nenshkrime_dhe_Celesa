@@ -60,6 +60,8 @@ def print_cert_info(cert_path, title):
             print(f"Mesazhi (hash): {binascii.hexlify(hash_bytes)}")
             print(f"\n🔏 Nenshkrimi i krijuar: {binascii.hexlify(signature)}")
             return signature
+
+
 def hybrid_encrypt(public_key, message):
     """Enkripto mesazhin duke perdorur hybrid encryption (AES + RSA)"""
     try:
@@ -91,3 +93,40 @@ def hybrid_encrypt(public_key, message):
     except Exception as e:
         print(f"❌ Gabim gjate enkriptimit hibrid: {e}")
         raise
+
+def start_client():
+    host = 'localhost'
+    port = 5000
+
+    private_key, server_public_key = load_certificates()
+    try:
+        message = input("\n✏️ Shkruani mesazhin per te derguar: ").encode('utf-8')
+    except KeyboardInterrupt:
+        print("\n🔴 Nderprerje nga perdoruesi. Programi po mbyllet.")
+        return
+
+    # Krijo nenshkrimin
+    signature = sign_message(private_key, message)
+
+    # Kombino mesazhin dhe nenshkrimin
+    combined = message + b'||SIG||' + signature
+    print(f"\n🧩 Mesazhi i kombinuar: {binascii.hexlify(combined)}")
+
+    # Kripto te gjithe permbajtjen
+    encrypted_data = hybrid_encrypt(server_public_key, combined)
+
+    # Krijo lidhjen e sigurt
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.load_cert_chain(certfile=CLIENT_CERT, keyfile=CLIENT_KEY)
+    context.load_verify_locations(cafile=SERVER_CERT)
+    context.verify_mode = ssl.CERT_REQUIRED
+
+    with socket.create_connection((host, port)) as sock:
+        with context.wrap_socket(sock, server_hostname=host) as ssock:
+            print(f"\n🚀 Dergimi i {len(encrypted_data)} bytes te te dhenave te kriptuara...")
+            ssock.sendall(encrypted_data)
+
+            response = ssock.recv(4096)
+            print(f"\n📨 Pergjigja nga serveri: {response.decode('utf-8')}")
+
+
