@@ -45,3 +45,18 @@ def load_certificates():
             backend=default_backend()
         )
     return private_key
+
+def verify_signature(message, signature):
+    """Verifiko nënshkrimin dhe shfaq detaje"""
+    with open(CLIENT_CERT, "rb") as f:
+        client_cert = f.read()
+
+    cert = x509.load_pem_x509_certificate(client_cert, default_backend())
+    public_key = cert.public_key()
+
+    print("\n Procesi i Verifikimit të Nënshkrimit:")
+    digest = hashes.Hash(hashes.SHA256())
+    digest.update(message)
+    message_hash = digest.finalize()
+    print(f"Mesazhi (hash): {binascii.hexlify(message_hash)}")
+    print(f"Nënshkrimi i marrë: {binascii.hexlify(signature)}")
