@@ -18,7 +18,7 @@ CLIENT_CERT = CERT_FOLDER / "client.crt"
 
 def print_cert_info(cert_path, title):
     """Shfaq informacione rreth certifikatës"""
-    print(f"\n🔍 {title} Information:")
+    print(f"\n {title} Information:")
     with open(cert_path, "rb") as f:
         cert = x509.load_pem_x509_certificate(f.read(), default_backend())
         print(f"Subject: {cert.subject.rfc4514_string()}")
@@ -31,3 +31,17 @@ def print_cert_info(cert_path, title):
 
         print(f"Serial Number: {cert.serial_number}")
         print(f"Public Key: {cert.public_key().public_numbers()}")
+
+def load_certificates():
+    """Ngarko certifikatat dhe shfaq informacione"""
+    print("\n Serveri po ngarkon certifikatat...")
+    print_cert_info(SERVER_CERT, "Server Certificate")
+    print_cert_info(CLIENT_CERT, "Client Certificate")
+
+    with open(SERVER_KEY, "rb") as f:
+        private_key = serialization.load_pem_private_key(
+            f.read(),
+            password=None,
+            backend=default_backend()
+        )
+    return private_key
